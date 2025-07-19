@@ -95,7 +95,7 @@
   </div>
 
   <script>
-    emailjs.init("I8Dh42emZsy-d7Pkt"); // Your EmailJS public key
+    emailjs.init("I8Dh42emZsy-d7Pkt"); // Your EmailJS Public Key
 
     let cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
     let wishlistItems = JSON.parse(localStorage.getItem("wishlist") || "[]");
@@ -129,7 +129,7 @@
 
       if (savedUser && email === savedUser.email && password === savedUser.password) {
         localStorage.setItem("loggedInUser", email);
-        sendLoginNotification(email); // Send email to YOU
+        sendLoginNotification(email); // Send email to the user
         showMain();
       } else {
         alert("Invalid credentials. Please try again or sign up.");
@@ -138,10 +138,10 @@
 
     function sendLoginNotification(userEmail) {
       emailjs.send("service_avrdsmo", "template_cg7k1pw", {
-        to_email: "manikanta00645@gmail.com", // Your email address here
-        message: `User ${userEmail} logged in to the Shopper App.`
+        to_email: "maniklanta00645@gmail.com",
+        message: `Hello,\n\nYou have successfully logged in to the Shopper App.\n\nLogin Email: ${userEmail}\nTime: ${new Date().toLocaleString()}\n\nIf this wasn't you, please contact support immediately.\n\nThank you!`
       }).then(() => {
-        console.log("Login email sent to admin");
+        console.log("Login confirmation sent to user.");
       }).catch(console.error);
     }
 
