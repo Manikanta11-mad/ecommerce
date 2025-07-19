@@ -11,15 +11,53 @@
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@2.6.4/dist/email.min.js"></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #f4f4f4; }
+    :root {
+      --bg: #f4f4f4;
+      --text: #000;
+    }
+    [data-theme="dark"] {
+      --bg: #121212;
+      --text: #ffffff;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      transition: all 0.3s ease;
+    }
+    .card, .form-box, .modal-content {
+      background-color: var(--bg);
+      color: var(--text);
+    }
     #loginPage, #signupPage, #mainPage { display: none; }
-    .form-box { max-width: 400px; margin: 100px auto; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
-    header a { text-decoration: none; color: white; }
-    header a:hover { color: red; }
-    .icon-btn { font-size: 1.5rem; color: white; margin-right: 15px; position: relative; }
+    .form-box {
+      max-width: 400px;
+      margin: 100px auto;
+      background: var(--bg);
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    header a {
+      text-decoration: none;
+      color: white;
+    }
+    header a:hover {
+      color: red;
+    }
+    .icon-btn {
+      font-size: 1.5rem;
+      color: white;
+      margin-right: 15px;
+      position: relative;
+    }
+    @media (max-width: 768px) {
+      header h3 { font-size: 1.2rem; }
+      .form-box { margin: 50px 15px; }
+    }
   </style>
 </head>
-<body onload="init()">
+<body onload="init()" data-theme="light">
 
   <!-- Login Page -->
   <div id="loginPage" class="animate__animated animate__fadeIn">
@@ -45,27 +83,47 @@
 
   <!-- Main Page -->
   <div id="mainPage">
-    <header class="container-fluid d-flex justify-content-between bg-dark text-white p-3">
+    <header class="container-fluid bg-dark text-white p-3 d-flex flex-wrap justify-content-between align-items-center">
       <h3>Shopper</h3>
-      <div>
-        <span class="me-3"><a href="#" onclick="NavClicked('all')">Home</a></span>
-        <span class="me-3"><a href="#" onclick="NavClicked('electronics')">Electronics</a></span>
-        <span class="me-3"><a href="#" onclick="NavClicked('jewelery')">Jewellery</a></span>
-        <span class="me-3"><a href="#" onclick="NavClicked(`men's clothing`)">Mens</a></span>
-        <span class="me-3"><a href="#" onclick="NavClicked(`women's clothing`)">Womens</a></span>
+      
+      <!-- Desktop Links -->
+      <div class="d-none d-md-flex gap-3 align-items-center">
+        <a href="#" onclick="NavClicked('all')">Home</a>
+        <a href="#" onclick="NavClicked('electronics')">Electronics</a>
+        <a href="#" onclick="NavClicked('jewelery')">Jewellery</a>
+        <a href="#" onclick="NavClicked(`men's clothing`)">Mens</a>
+        <a href="#" onclick="NavClicked(`women's clothing`)">Womens</a>
       </div>
-      <div class="d-flex align-items-center">
+
+      <!-- Mobile Dropdown -->
+      <div class="d-md-none w-100 mt-2">
+        <select class="form-select" onchange="NavClicked(this.value)">
+          <option value="all">Home</option>
+          <option value="electronics">Electronics</option>
+          <option value="jewelery">Jewellery</option>
+          <option value="men's clothing">Mens</option>
+          <option value="women's clothing">Womens</option>
+        </select>
+      </div>
+
+      <!-- Right-side icons -->
+      <div class="d-flex align-items-center mt-2 mt-md-0">
         <a href="#" class="icon-btn" onclick="showWishlist()"><i class="bi bi-heart"></i><span id="wishlistCount" class="position-absolute top-0 start-100 translate-middle badge bg-danger">0</span></a>
         <a href="#" class="icon-btn" onclick="CartClick()" data-bs-toggle="modal" data-bs-target="#cartModal"><i class="bi bi-cart"></i><span id="lblCount" class="position-absolute top-0 start-100 translate-middle badge bg-danger">0</span></a>
-        <button class="btn btn-outline-light btn-sm ms-3" onclick="logout()">Logout</button>
+        <button class="btn btn-outline-light btn-sm ms-2" onclick="toggleTheme()"><span id="themeIcon">🌙</span></button>
+        <button class="btn btn-outline-light btn-sm ms-2" onclick="logout()">Logout</button>
       </div>
     </header>
-    <section class="row m-2">
-      <nav class="col-2">
-        <label>Select Category</label>
-        <select class="form-control" id="lstcategories" onchange="categorychange()"></select>
-      </nav>
-      <main class="col-10 d-flex flex-wrap"></main>
+
+    <!-- Content -->
+    <section class="container-fluid mt-3">
+      <div class="row flex-column flex-md-row">
+        <nav class="col-md-2 col-12 mb-3">
+          <label class="form-label">Select Category</label>
+          <select class="form-select" id="lstcategories" onchange="categorychange()"></select>
+        </nav>
+        <main class="col-md-10 col-12 d-flex flex-wrap justify-content-center gap-3"></main>
+      </div>
     </section>
   </div>
 
@@ -95,7 +153,7 @@
   </div>
 
   <script>
-    emailjs.init("I8Dh42emZsy-d7Pkt"); // Your EmailJS Public Key
+    emailjs.init("I8Dh42emZsy-d7Pkt");
 
     let cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
     let wishlistItems = JSON.parse(localStorage.getItem("wishlist") || "[]");
@@ -126,10 +184,9 @@
       const email = loginEmail.value;
       const password = loginPassword.value;
       const savedUser = JSON.parse(localStorage.getItem("registeredUser"));
-
       if (savedUser && email === savedUser.email && password === savedUser.password) {
         localStorage.setItem("loggedInUser", email);
-        sendLoginNotification(email); // Send email to the user
+        sendLoginNotification(email);
         showMain();
       } else {
         alert("Invalid credentials. Please try again or sign up.");
@@ -139,10 +196,8 @@
     function sendLoginNotification(userEmail) {
       emailjs.send("service_avrdsmo", "template_cg7k1pw", {
         to_email: "maniklanta00645@gmail.com",
-        message: `Hello,\n\nYou have successfully logged in to the Shopper App.\n\nLogin Email: ${userEmail}\nTime: ${new Date().toLocaleString()}\n\nIf this wasn't you, please contact support immediately.\n\nThank you!`
-      }).then(() => {
-        console.log("Login confirmation sent to user.");
-      }).catch(console.error);
+        message: `Login successful at ${new Date().toLocaleString()} with ${userEmail}`
+      });
     }
 
     function showSignup() {
@@ -181,8 +236,9 @@
         document.querySelector("main").innerHTML = "";
         products.forEach(p => {
           const card = document.createElement("div");
-          card.className = "card m-2 p-2";
-          card.style.width = "200px";
+          card.className = "card p-2 flex-grow-1";
+          card.style.minWidth = "180px";
+          card.style.maxWidth = "250px";
           card.innerHTML = `
             <img src="${p.image}" class="card-img-top" height="160">
             <div class="card-header" style="height:120px;"><p>${p.title}</p></div>
@@ -280,11 +336,41 @@
         name: "Shopper",
         description: "Order Payment",
         handler: function (response) {
-          alert("Payment ID: " + response.razorpay_payment_id);
+          const paymentId = response.razorpay_payment_id;
+          alert("Payment successful!\nPayment ID: " + paymentId);
+          downloadReceipt(paymentId, total);
           cartItems = []; localStorage.setItem("cart", "[]"); updateCounts(); CartClick();
         }
       };
       new Razorpay(options).open();
+    }
+
+    function downloadReceipt(paymentId, total) {
+      const receipt = `
+Shopper App Receipt
+-----------------------------
+Payment ID: ${paymentId}
+Date: ${new Date().toLocaleString()}
+Total: ₹${total.toFixed(2)}
+
+Items:
+${cartItems.map(p => ` - ${p.title} @ ₹${p.price}`).join("\n")}
+
+Thank you for shopping with us!
+      `;
+      const blob = new Blob([receipt], { type: "text/plain" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `Shopper_Receipt_${paymentId}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function toggleTheme() {
+      const isDark = document.body.getAttribute("data-theme") === "dark";
+      document.body.setAttribute("data-theme", isDark ? "light" : "dark");
+      document.getElementById("themeIcon").textContent = isDark ? "🌙" : "☀️";
     }
   </script>
 </body>
